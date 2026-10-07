@@ -40,13 +40,13 @@ macOS 13 or newer and include the CLI, libraries, headers and license notices.
 They are ad-hoc signed, not Apple notarized. Verify the accompanying SHA-256:
 
 ```sh
-# Replace v0.1.0 if downloading a newer release.
-gh release download v0.1.0 --repo Frulko/macos-dell-WD22T04-controller \
-  --pattern 'dockctl-v0.1.0-macos-arm64.tar.gz*'
-shasum -a 256 -c dockctl-v0.1.0-macos-arm64.tar.gz.sha256
+# Replace v0.1.1 if downloading a newer release.
+gh release download v0.1.1 --repo Frulko/macos-dell-WD22T04-controller \
+  --pattern 'dockctl-v0.1.1-macos-arm64.tar.gz*'
+shasum -a 256 -c dockctl-v0.1.1-macos-arm64.tar.gz.sha256
 mkdir -p downloaded
-tar -xzf dockctl-v0.1.0-macos-arm64.tar.gz -C downloaded
-./downloaded/dockctl-v0.1.0-macos-arm64/bin/dockctl --help
+tar -xzf dockctl-v0.1.1-macos-arm64.tar.gz -C downloaded
+./downloaded/dockctl-v0.1.1-macos-arm64/bin/dockctl --help
 ```
 
 ### Build locally
@@ -87,7 +87,7 @@ sudo dockctl watch --silence --seconds 900
 
 # Customize thresholds and require stable conditions for one minute.
 sudo dockctl watch --silence --seconds 900 \
-  --ventilate-at 42,47,68 --resume-at 40,45,66 --stable-seconds 60
+  --ventilate-at 45,50,70 --resume-at 40,45,66 --stable-seconds 60
 ```
 
 The watcher requires automatic mode and valid telemetry at startup. It observes
@@ -96,7 +96,7 @@ eligible when all three temperatures stay at or below **40/45/66 °C** for
 30 seconds and the speed class is not 2. The observation and minimum automatic
 interval overlap.
 
-During silence, any sensor continuously at or above its **42/47/68 °C** threshold
+During silence, any sensor continuously at or above its **45/50/70 °C** threshold
 for 30 seconds requests automatic mode. An isolated spike resets the timer once
 all sensors drop below their ventilation thresholds. Each silent period has a
 **300-second maximum target**, even when temperatures stay low. Before another
@@ -109,7 +109,7 @@ again. The final automatic mode is verified.
 | `--silence-seconds` | 300 | Per silent period, 9–300 seconds |
 | `--cooling-seconds` | 30 | Minimum automatic interval, 30–600 seconds |
 | `--stable-seconds` | 30 | Continuous qualifying condition in either direction, 1–120 seconds |
-| `--ventilate-at` | `42,47,68` | Local, remote, module thresholds in °C |
+| `--ventilate-at` | `45,50,70` | Local, remote, module thresholds in °C |
 | `--resume-at` | `40,45,66` | Each must be below its ventilation threshold |
 
 Critical thresholds **55/60/73 °C**, cancellation, invalid readings and I/O
@@ -134,7 +134,8 @@ Automatic mode, forced settings, a brief stop, a one-minute stop and Ctrl-C
 restoration have been physically observed. A subsequent user trace confirms a silent period of 301.4 seconds, automatic
 restoration at its deadline, filtering of isolated 68 °C module readings and
 re-entry after stable temperatures. Maxima in the supplied trace were
-36/37/68 °C. The complete 15-minute session and sustained over-threshold or
+36/37/68 °C. The raised 45/50/70 °C defaults introduced in v0.1.1 have not yet been
+physically validated. The complete 15-minute session and sustained over-threshold or
 critical-threshold recovery have not been physically validated. These tests
 do not establish safe permanent silence.
 

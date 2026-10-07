@@ -17,7 +17,7 @@ static int read_sample(void *ptr,dock_thermal *out,bool interruptible,dock_error
     }
     if(s->reads==s->fail_read) {snprintf(error->message,sizeof(error->message),"simulated read failure");return 1;}
     int module=64;
-    if(s->silent && (s->hot || (s->hot_once && !s->spike_seen))) {module=68;s->spike_seen=true;}
+    if(s->silent && (s->hot || (s->hot_once && !s->spike_seen))) {module=70;s->spike_seen=true;}
     if(s->silent && s->critical) module=73;
     *out=(dock_thermal){.mode=s->silent?1:0,.speed_class=s->silent?0:1,
         .temperature_c={34,36,module},.observed_ms=s->now};
@@ -46,7 +46,7 @@ static void event(void *ptr,const dock_watch_event *event) {
         assert(s->silent==(event->state==DOCK_SILENT)); // Emitted BEFORE the write.
         if(event->reason==DOCK_MODULE_LIMIT) {
             s->hot_event=true;
-            assert(event->sample.temperature_c[2]==68 && event->target==DOCK_COOLING);
+            assert(event->sample.temperature_c[2]==70 && event->target==DOCK_COOLING);
             assert(event->pending_elapsed_ms>=30000 && event->state_elapsed_ms<300000);
         }
         if(event->reason==DOCK_SILENCE_LIMIT) {
@@ -69,6 +69,7 @@ static int run(simulation *s,unsigned seconds) {
 }
 int main(void) {
     dock_watch_options o;dock_watch_defaults(&o);assert(dock_watch_options_valid(&o));
+    assert(o.ventilate_at_c[0]==45 && o.ventilate_at_c[1]==50 && o.ventilate_at_c[2]==70);
     dock_policy p={.state=DOCK_COOLING,.changed_ms=1000};dock_thermal t={.mode=0,.speed_class=1,.temperature_c={34,36,64}};
     assert(dock_policy_next(&p,&o,&t,1000)==DOCK_COOLING);
     assert(dock_policy_next(&p,&o,&t,30999)==DOCK_COOLING);
@@ -91,20 +92,23 @@ int main(void) {
         t.temperature_c[i]=original;
     }
     p=(dock_policy){.state=DOCK_SILENT,.changed_ms=1000};
+    // Sustained 68 C no longer qualifies for ventilation under the raised defaults.
     t.temperature_c[2]=68;assert(dock_policy_next(&p,&o,&t,2000)==DOCK_SILENT);
-    t.temperature_c[2]=67;assert(dock_policy_next(&p,&o,&t,5000)==DOCK_SILENT);
-    t.temperature_c[2]=68;assert(dock_policy_next(&p,&o,&t,6000)==DOCK_SILENT);
+    assert(dock_policy_next(&p,&o,&t,32000)==DOCK_SILENT && p.pending_reason==DOCK_REASON_NONE);
+    t.temperature_c[2]=70;assert(dock_policy_next(&p,&o,&t,2000)==DOCK_SILENT);
+    t.temperature_c[2]=69;assert(dock_policy_next(&p,&o,&t,5000)==DOCK_SILENT);
+    t.temperature_c[2]=70;assert(dock_policy_next(&p,&o,&t,6000)==DOCK_SILENT);
     assert(dock_policy_next(&p,&o,&t,35999)==DOCK_SILENT);
     assert(dock_policy_next(&p,&o,&t,36000)==DOCK_COOLING);t.temperature_c[2]=64;
     p=(dock_policy){.state=DOCK_SILENT,.changed_ms=1000};
-    t.temperature_c[0]=42;assert(dock_policy_next(&p,&o,&t,2000)==DOCK_SILENT);
-    t.temperature_c[0]=34;t.temperature_c[1]=47;
+    t.temperature_c[0]=45;assert(dock_policy_next(&p,&o,&t,2000)==DOCK_SILENT);
+    t.temperature_c[0]=34;t.temperature_c[1]=50;
     assert(dock_policy_next(&p,&o,&t,10000)==DOCK_SILENT);
     assert(dock_policy_next(&p,&o,&t,32000)==DOCK_COOLING);t.temperature_c[1]=36;
     t.mode=0;assert(dock_policy_next(&p,&o,&t,2000)==DOCK_COOLING);
     o.silence_seconds=301;assert(!dock_watch_options_valid(&o));dock_watch_defaults(&o);
     o.ventilate_at_c[2]=73;assert(!dock_watch_options_valid(&o));dock_watch_defaults(&o);
-    o.resume_below_c[2]=68;assert(!dock_watch_options_valid(&o));dock_watch_defaults(&o);
+    o.resume_below_c[2]=70;assert(!dock_watch_options_valid(&o));dock_watch_defaults(&o);
     o.stable_seconds=0;assert(!dock_watch_options_valid(&o));
     simulation s={.now=60000};assert(!run(&s,900));assert(s.stops>=2 && !s.silent && s.restores>=s.stops && s.deadline_event);
     s=(simulation){.now=60000,.hot=true};assert(!run(&s,120));assert(s.stops && s.restores && !s.silent && s.hot_event);

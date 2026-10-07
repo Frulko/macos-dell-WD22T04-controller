@@ -38,8 +38,8 @@ keeping the fan off below those temperatures is safe.
 
 ## Assessment of proposed 40 / 50 / 75 °C thresholds
 
-- 40 °C local would be lower than the current 42 °C ventilation threshold.
-- 50 °C remote would be higher than the current 47 °C threshold, but below the
+- 40 °C local would be lower than the original 42 °C ventilation threshold.
+- 50 °C remote would be higher than the original 47 °C threshold, but below the
   normal remote curve's first rising threshold, 58 °C.
 - 75 °C module exceeds both the normal 66 °C fan-start threshold and the 73 °C
   next-speed threshold. It also exceeds the CLI's current 73 °C critical backstop
@@ -52,3 +52,13 @@ relationship have not been established. The latest user trace had maxima
 not a sustained thermal threshold. Raising thresholds would not remove that
 explicitly requested time cap. No higher thresholds or longer silent periods
 were applied during this research.
+
+## Raised defaults in v0.1.1
+
+At the user's request, ventilation defaults are now 45/50/70 °C, confirmed for
+30 seconds. Resume thresholds remain 40/45/66 °C, the silence cap remains
+300 seconds, and critical backstops remain 55/60/73 °C without stability delay.
+These are experimental choices, not certified limits. The module default is
+below the next factory curve step at 73 °C, while still overriding its initial
+fan-start decision at 66 °C. No physical test of the raised defaults has yet
+been supplied. Existing custom CLI values still override defaults.

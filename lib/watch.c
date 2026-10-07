@@ -4,7 +4,7 @@
 #include <string.h>
 
 void dock_watch_defaults(dock_watch_options *o) {
-    if (o) *o = (dock_watch_options){300,300,30,30,{40,45,66},{42,47,68}};
+    if (o) *o = (dock_watch_options){300,300,30,30,{40,45,66},{45,50,70}};
 }
 
 // Experimental backstop, below/at the EC03 next-speed thresholds (62/70/73).

@@ -134,7 +134,7 @@ static void print_power(dock_t *d,bool json) {
 static const struct { const char *id,*status,*description; } features[]={
     {"thermal_read","device_verified","Trois températures et classe de vitesse ; pas de RPM exact."},
     {"thermal_auto","device_verified","Régulation autonome du dock ; retour confirmé après les essais."},
-    {"silence_watch","experimental","Silence cible max 300 s ; seuils réglables 42/47/68 C, stabilité 30 s ; critiques immédiats 55/60/73 C, hors latence I/O."},
+    {"silence_watch","experimental","Silence cible max 300 s ; seuils réglables 45/50/70 C, stabilité 30 s ; critiques immédiats 55/60/73 C, hors latence I/O."},
     {"power_supply","device_verified","Puissance déclarée du bloc, pas consommation instantanée."},
     {"power_contract","capture_correlated","Offres fixes PDO ; RDO et PDO actif corrélés sur la capture Apple 10 octets ; disposition inférée, puissance de capacité."},
     {"host_power","experimental","Profils de charge, tension/courant/puissance d'entrée du Mac via AppleSmartBattery ; clés privées, pas consommation totale du dock."},
@@ -192,7 +192,7 @@ static void usage(void) {
          "        sudo dockctl inspect|thermal|power|connect|auto [--json]\n"
          "        sudo dockctl watch [--silence] [--seconds 300] [--json]\n"
          "        Réglages avec --silence :\n"
-         "          --ventilate-at 42,47,68   seuils locale/distante/module (°C)\n"
+         "          --ventilate-at 45,50,70   seuils locale/distante/module (°C)\n"
          "          --resume-at 40,45,66      seuils pour retrouver le silence\n"
          "          --stable-seconds 30       condition maintenue (1–120 s)\n"
          "          --cooling-seconds 30      minimum en automatique (30–600 s)\n"

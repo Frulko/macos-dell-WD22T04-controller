@@ -22,7 +22,7 @@ for args in [('watch', '--seconds', '0'), ('watch', '--seconds', '3601'),
              ('watch', '--silence', '--ventilate-at', '42,47,68,70'),
              ('watch', '--silence', '--ventilate-at', '42,47,68x'),
              ('watch', '--silence', '--ventilate-at', '42,47,73'),
-             ('watch', '--silence', '--resume-at', '42,47,68'),
+             ('watch', '--silence', '--resume-at', '45,50,70'),
              ('info', '--ventilate-at', '42,47,68')]:
     result = run(*args)
     assert result.returncode == 2, (args, result)
