@@ -39,8 +39,10 @@ separate. Identity/partner checks precede sends and sessions share a process loc
   operating capacity 87.75 W. This is contract capacity, not measured consumption.
 - Unknown: dock-wide/per-port power, external exact RPM, named thermal profiles,
   configurable internal curves and safe long-term passive operation.
-- Not hardware-validated yet: the five-minute silence policy and new configurable
-  stability thresholds. Software tests cover those decisions and restoration.
+- Newly observed: a 301.4-second silent period restored at the time limit,
+  isolated 68 °C module samples filtered, and subsequent silent re-entry.
+- Not physically validated: a complete 15-minute run or sustained/critical hot
+  conditions. Software tests cover those decisions and restoration.
 
 ## Files
 
@@ -61,3 +63,15 @@ included. Official source links and download hashes are retained in the notebook
 
 See [Resources](../docs/RESOURCES.md) for primary references. Capture identity data
 can include serials and Service Tags; remove these before sharing fresh logs.
+
+## Five-minute user trace
+
+The supplied run began silence at session +36.8 s. At +338.2 s, it requested
+cooling because the silent deadline was reached (301.4 s), with temperatures
+36/37/66 °C. Isolated module readings of 68 °C at +252.1, +282.9 and +332.1 s
+started the stability timer, but the next below-threshold reading reset it.
+During automatic recovery, a 68 °C sample reset eligibility at +368.8 s;
+continuous readings at or below 40/45/66 °C then qualified for silence at
++405.7 s. The supplied trace ends at +417.8 s in forced mode, speed class 0.
+It does not contain the session's final restoration or prove steady-state
+thermal safety. No thresholds or five-minute cap were increased from this trace.

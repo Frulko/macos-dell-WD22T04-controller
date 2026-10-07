@@ -131,9 +131,12 @@ when the connection responds again. `/var/run/dockctl-hpm.lock` prevents
 competing sessions of this library/probe, but does not lock third-party tools.
 
 Automatic mode, forced settings, a brief stop, a one-minute stop and Ctrl-C
-restoration have been physically observed. **The five-minute policy and new
-stability thresholds still need hardware validation.** The one-minute test
-reached maxima of 34/36/64 °C; it does not establish safe permanent silence.
+restoration have been physically observed. A subsequent user trace confirms a silent period of 301.4 seconds, automatic
+restoration at its deadline, filtering of isolated 68 °C module readings and
+re-entry after stable temperatures. Maxima in the supplied trace were
+36/37/68 °C. The complete 15-minute session and sustained over-threshold or
+critical-threshold recovery have not been physically validated. These tests
+do not establish safe permanent silence.
 
 ## CLI reference
 

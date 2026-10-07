@@ -16,14 +16,14 @@ jobs:
     env:
       MACOSX_DEPLOYMENT_TARGET: '13.0'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - name: Build and run hardware-free checks
         run: make check
       - name: Check the Homebrew formula
         run: ruby -c Formula/dockctl.rb
       - name: Package CLI and library
         run: scripts/package.sh "dev-${GITHUB_SHA:0:7}"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: dockctl-${{ matrix.runner }}
           path: |
