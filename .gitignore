@@ -1,0 +1,20 @@
+# Build products
+/dockctl
+/libdock.a
+/libdock.dylib
+/lib/*.o
+/tests/check
+/examples/info
+/examples/watch
+/dist/
+/research/dockctl-probe
+/research/hpm-probe
+# Locally downloaded vendor packages and generated reverse-engineering artifacts
+/firmware/
+/research/windows/
+/research/extracted/
+/research/*-il.txt
+/research/*-mips.txt
+/research/macvdmtool/.git/
+.DS_Store
+__pycache__/

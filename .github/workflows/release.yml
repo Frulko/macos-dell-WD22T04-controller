@@ -1,0 +1,66 @@
+name: Release binaries and Homebrew formula
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-14, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    env:
+      MACOSX_DEPLOYMENT_TARGET: '13.0'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate release version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: '[[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]'
+      - run: make check
+      - name: Package CLI and library
+        env:
+          TAG: ${{ github.ref_name }}
+        run: scripts/package.sh "$TAG"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.runner }}
+          path: |
+            dist/*.tar.gz
+            dist/*.sha256
+  publish:
+    needs: build
+    runs-on: macos-14
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      # Formula updates belong on main; the released tag stays immutable.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+      - name: Publish downloadable archives
+        run: |
+          gh release create "$TAG" dist/*.tar.gz dist/*.sha256 \
+            --verify-tag --title "dockctl $TAG" --generate-notes
+      - name: Update and validate the stable Homebrew formula
+        run: |
+          python3 scripts/update-formula.py "$TAG"
+          ruby -c Formula/dockctl.rb
+      - name: Publish the tap update
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Formula/dockctl.rb
+          git diff --cached --quiet && exit 0
+          git commit -m "brew: pin dockctl $TAG"
+          git push origin HEAD:main

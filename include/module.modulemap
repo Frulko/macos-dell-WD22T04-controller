@@ -1,0 +1,4 @@
+module Dock {
+    header "dock.h"
+    export *
+}

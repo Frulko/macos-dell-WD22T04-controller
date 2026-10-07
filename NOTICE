@@ -1,0 +1,13 @@
+dockctl
+Copyright (c) 2026 Frulko
+
+Most original files are MIT-licensed; see SPDX headers and LICENSE.
+lib/hpm.c and research/hpm-probe.c are Apache-2.0-licensed.
+AppleHPMLib definitions derive from AsahiLinux/macvdmtool, copyright 2021
+The Asahi Linux Contributors. Vendored revision:
+b22ae51eb43a0e1daa21d41616ac899f28e7bf8a
+https://github.com/AsahiLinux/macvdmtool
+The Apache-2.0 license is included at research/macvdmtool/LICENSE.
+Dell HID framing follows fwupd's Dell/Realtek protocol implementation
+under its MIT license option: https://github.com/fwupd/fwupd/tree/main/plugins/dell-dock
+Dell/TI firmware, Windows installers and extracted binaries are not distributed.
