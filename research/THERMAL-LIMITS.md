@@ -62,3 +62,14 @@ These are experimental choices, not certified limits. The module default is
 below the next factory curve step at 73 °C, while still overriding its initial
 fan-start decision at 66 °C. No physical test of the raised defaults has yet
 been supplied. Existing custom CLI values still override defaults.
+
+## Optional per-period deadline in v0.1.2
+
+The user withdrew the earlier five-minute cap requirement after screenshots
+showed a time-triggered restart at 36/37/66 °C. `silence_seconds == 0` now means
+no per-period deadline and is the default. A 9–300-second cap remains optional.
+Session expiry, stable thermal thresholds, critical thresholds, stale readings,
+communication errors and ordinary cancellation still restore automatic mode.
+The removed timer was implemented by the same process as thermal monitoring;
+it was never a hardware watchdog and could not recover after a process crash.
+No long-term fanless safety or physical test of this setting is established.

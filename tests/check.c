@@ -62,11 +62,13 @@ static void event(void *ptr,const dock_watch_event *event) {
         s->error_event=true;assert(event->sample.observed_ms && event->sample_age_ms>=6000);
     }
 }
-static int run(simulation *s,unsigned seconds) {
-    dock_watch_options o;dock_watch_defaults(&o);o.session_seconds=seconds;
+static int run_with_limit(simulation *s,unsigned seconds,unsigned limit) {
+    dock_watch_options o;dock_watch_defaults(&o);o.session_seconds=seconds;o.silence_seconds=limit;
     dock_watch_io io={s,read_sample,set_mode,now,pause_io};dock_error e={{0}};
     return dock_watch_run(&io,&o,cancel,event,s,&e);
 }
+// Keep coverage for an explicitly requested five-minute cap as well as unlimited silence.
+static int run(simulation *s,unsigned seconds) { return run_with_limit(s,seconds,300); }
 int main(void) {
     dock_watch_options o;dock_watch_defaults(&o);assert(dock_watch_options_valid(&o));
     assert(o.ventilate_at_c[0]==45 && o.ventilate_at_c[1]==50 && o.ventilate_at_c[2]==70);
@@ -77,8 +79,12 @@ int main(void) {
     t.temperature_c[2]=67;assert(dock_policy_next(&p,&o,&t,31000)==DOCK_COOLING);
     t.temperature_c[2]=64;t.speed_class=2;assert(dock_policy_next(&p,&o,&t,31000)==DOCK_COOLING);
     t.speed_class=1;t.mode=1;p=(dock_policy){.state=DOCK_SILENT,.changed_ms=1000};
+    assert(o.silence_seconds==0);
+    assert(dock_policy_next(&p,&o,&t,3601000)==DOCK_SILENT);
+    o.silence_seconds=300;
     assert(dock_policy_next(&p,&o,&t,300999)==DOCK_SILENT);
     assert(dock_policy_next(&p,&o,&t,301000)==DOCK_COOLING);
+    dock_watch_defaults(&o);
     for(unsigned i=0;i<3;i++) {
         p=(dock_policy){.state=DOCK_SILENT,.changed_ms=1000};
         int original=t.temperature_c[i];t.temperature_c[i]=o.ventilate_at_c[i];
@@ -110,6 +116,10 @@ int main(void) {
     o.ventilate_at_c[2]=73;assert(!dock_watch_options_valid(&o));dock_watch_defaults(&o);
     o.resume_below_c[2]=70;assert(!dock_watch_options_valid(&o));dock_watch_defaults(&o);
     o.stable_seconds=0;assert(!dock_watch_options_valid(&o));
+    simulation unlimited={.now=60000};assert(!run_with_limit(&unlimited,900,0));
+    assert(unlimited.stops==1 && !unlimited.silent && unlimited.restores && !unlimited.deadline_event);
+    unlimited=(simulation){.now=60000,.hot=true};assert(!run_with_limit(&unlimited,120,0));
+    assert(unlimited.hot_event && unlimited.restores && !unlimited.silent);
     simulation s={.now=60000};assert(!run(&s,900));assert(s.stops>=2 && !s.silent && s.restores>=s.stops && s.deadline_event);
     s=(simulation){.now=60000,.hot=true};assert(!run(&s,120));assert(s.stops && s.restores && !s.silent && s.hot_event);
     s=(simulation){.now=60000,.hot_once=true};assert(!run(&s,120));assert(s.stops==1 && s.spike_seen && !s.hot_event);

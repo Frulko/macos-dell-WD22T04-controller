@@ -4,7 +4,7 @@
 #include <string.h>
 
 void dock_watch_defaults(dock_watch_options *o) {
-    if (o) *o = (dock_watch_options){300,300,30,30,{40,45,66},{45,50,70}};
+    if (o) *o = (dock_watch_options){300,0,30,30,{40,45,66},{45,50,70}};
 }
 
 // Experimental backstop, below/at the EC03 next-speed thresholds (62/70/73).
@@ -13,7 +13,7 @@ static const int critical_c[]={55,60,73};
 
 bool dock_watch_options_valid(const dock_watch_options *o) {
     if (!o || !o->session_seconds || o->session_seconds > 3600 ||
-        o->silence_seconds < 9 || o->silence_seconds > 300 ||
+        (o->silence_seconds && (o->silence_seconds < 9 || o->silence_seconds > 300)) ||
         o->cooling_seconds < 30 || o->cooling_seconds > 600 ||
         !o->stable_seconds || o->stable_seconds > 120) return false;
     for (unsigned i = 0; i < 3; i++)
@@ -44,7 +44,7 @@ static decision decide(dock_policy *p, const dock_watch_options *o,
         for (unsigned i = 0; i < 3; i++)
             if (s->temperature_c[i] >= critical_c[i])
                 return (decision){DOCK_COOLING, (dock_watch_reason)(DOCK_CRITICAL_LOCAL+i)};
-        if (now - p->changed_ms >= (uint64_t)o->silence_seconds * 1000)
+        if (o->silence_seconds && now - p->changed_ms >= (uint64_t)o->silence_seconds * 1000)
             return (decision){DOCK_COOLING, DOCK_SILENCE_LIMIT};
         for (unsigned i = 0; i < 3; i++)
             if (s->temperature_c[i] >= o->ventilate_at_c[i]) {

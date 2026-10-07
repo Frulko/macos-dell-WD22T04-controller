@@ -80,6 +80,7 @@ uint64_t dock_monotonic_ms(void);
 
 typedef enum { DOCK_COOLING, DOCK_SILENT, DOCK_FINISHED } dock_watch_state;
 typedef struct {
+    // silence_seconds == 0 disables the per-period deadline; session expiry still restores.
     unsigned session_seconds, silence_seconds, cooling_seconds, stable_seconds;
     int resume_below_c[3], ventilate_at_c[3];
 } dock_watch_options;

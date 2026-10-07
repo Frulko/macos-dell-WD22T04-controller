@@ -134,7 +134,7 @@ static void print_power(dock_t *d,bool json) {
 static const struct { const char *id,*status,*description; } features[]={
     {"thermal_read","device_verified","Trois températures et classe de vitesse ; pas de RPM exact."},
     {"thermal_auto","device_verified","Régulation autonome du dock ; retour confirmé après les essais."},
-    {"silence_watch","experimental","Silence cible max 300 s ; seuils réglables 45/50/70 C, stabilité 30 s ; critiques immédiats 55/60/73 C, hors latence I/O."},
+    {"silence_watch","experimental","Silence piloté par température ; limite temporelle optionnelle ; seuils réglables 45/50/70 C, stabilité 30 s ; critiques immédiats 55/60/73 C, hors latence I/O."},
     {"power_supply","device_verified","Puissance déclarée du bloc, pas consommation instantanée."},
     {"power_contract","capture_correlated","Offres fixes PDO ; RDO et PDO actif corrélés sur la capture Apple 10 octets ; disposition inférée, puissance de capacité."},
     {"host_power","experimental","Profils de charge, tension/courant/puissance d'entrée du Mac via AppleSmartBattery ; clés privées, pas consommation totale du dock."},
@@ -196,7 +196,7 @@ static void usage(void) {
          "          --resume-at 40,45,66      seuils pour retrouver le silence\n"
          "          --stable-seconds 30       condition maintenue (1–120 s)\n"
          "          --cooling-seconds 30      minimum en automatique (30–600 s)\n"
-         "          --silence-seconds 300     limite par période silencieuse (9–300 s)\n"
+         "          --silence-seconds 0       sans limite par période (ou 9–300 s)\n"
          "watch : lecture seule par défaut. --silence active le watcher expérimental.\n"
          "Retour sans temporisation sur seuil critique 55/60/73 °C, erreur ou Ctrl-C.\n"
          "JSON du watcher : un objet par ligne. Ctrl-C termine avec retour automatique si nécessaire.");
@@ -227,7 +227,7 @@ int main(int argc,char **argv) {
                  !strcmp(argv[i],"--cooling-seconds") || !strcmp(argv[i],"--stable-seconds")) && i+1<argc) {
             const char *option=argv[i];
             char *end;errno=0;unsigned long n=strtoul(argv[++i],&end,10);
-            if(errno || !*argv[i] || *end || n<1 || n>3600) {fputs("Durée attendue : 1 à 3600 secondes.\n",stderr);return 2;}
+            if(errno || !*argv[i] || *end || (n<1 && strcmp(option,"--silence-seconds")) || n>3600) {fputs("Durée attendue : 1 à 3600 secondes (0 autorisé pour --silence-seconds).\n",stderr);return 2;}
             if(!strcmp(option,"--seconds")) {seconds=(unsigned)n;seconds_given=true;}
             else {
                 tuning_given=true;
@@ -240,7 +240,7 @@ int main(int argc,char **argv) {
     if(((silence || seconds_given || tuning_given) && strcmp(cmd,"watch")) || (tuning_given && !silence)) {usage();return 2;}
     options.session_seconds=seconds;
     if(!dock_watch_options_valid(&options)) {
-        fputs("Réglages invalides : reprise < ventilation < 55/60/73 °C ; stabilité 1–120 s, automatique 30–600 s, silence 9–300 s.\n",stderr);return 2;
+        fputs("Réglages invalides : reprise < ventilation < 55/60/73 °C ; stabilité 1–120 s, automatique 30–600 s, silence 0 (sans limite) ou 9–300 s.\n",stderr);return 2;
     }
     if(!strcmp(cmd,"features")) {print_features(json);if(json)putchar('\n');return 0;}
     if(!strcmp(cmd,"host-power")) {
@@ -259,10 +259,14 @@ int main(int argc,char **argv) {
     dock_t *d=NULL;if(dock_open(&d,&error)) {fprintf(stderr,"%s\n",error.message);return 1;}
     int result=0;dock_thermal sample;
     if(watch && silence) {
-        if(!json)printf("Silence surveillé expérimental : limite %u s ; automatique >=%u s ; stabilité %u s, hors délais I/O.\nVentilation à %d/%d/%d °C ; reprise du silence à %d/%d/%d °C.\nSeuils critiques sans temporisation : 55/60/73 °C.\nObservation initiale avant le premier silence. Garder le processus et la liaison actifs.\n",
-            options.silence_seconds,options.cooling_seconds,options.stable_seconds,
+        if(!json) {
+            if(options.silence_seconds)printf("Limite par période silencieuse : %u s.\n",options.silence_seconds);
+            else puts("Silence piloté par température : aucune limite par période silencieuse.");
+            printf("Silence surveillé expérimental : automatique >=%u s ; stabilité %u s, hors délais I/O.\nVentilation à %d/%d/%d °C ; reprise du silence à %d/%d/%d °C.\nSeuils critiques sans temporisation : 55/60/73 °C.\nObservation initiale avant le premier silence. Garder le processus et la liaison actifs.\n",
+            options.cooling_seconds,options.stable_seconds,
             options.ventilate_at_c[0],options.ventilate_at_c[1],options.ventilate_at_c[2],
             options.resume_below_c[0],options.resume_below_c[1],options.resume_below_c[2]);
+        }
         result=dock_watch(d,&options,cancelled,watch_update,&json,&error);
     } else if(watch) {
         uint64_t start=dock_monotonic_ms();

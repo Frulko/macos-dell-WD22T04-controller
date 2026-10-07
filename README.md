@@ -40,13 +40,13 @@ macOS 13 or newer and include the CLI, libraries, headers and license notices.
 They are ad-hoc signed, not Apple notarized. Verify the accompanying SHA-256:
 
 ```sh
-# Replace v0.1.1 if downloading a newer release.
-gh release download v0.1.1 --repo Frulko/macos-dell-WD22T04-controller \
-  --pattern 'dockctl-v0.1.1-macos-arm64.tar.gz*'
-shasum -a 256 -c dockctl-v0.1.1-macos-arm64.tar.gz.sha256
+# Replace v0.1.2 if downloading a newer release.
+gh release download v0.1.2 --repo Frulko/macos-dell-WD22T04-controller \
+  --pattern 'dockctl-v0.1.2-macos-arm64.tar.gz*'
+shasum -a 256 -c dockctl-v0.1.2-macos-arm64.tar.gz.sha256
 mkdir -p downloaded
-tar -xzf dockctl-v0.1.1-macos-arm64.tar.gz -C downloaded
-./downloaded/dockctl-v0.1.1-macos-arm64/bin/dockctl --help
+tar -xzf dockctl-v0.1.2-macos-arm64.tar.gz -C downloaded
+./downloaded/dockctl-v0.1.2-macos-arm64/bin/dockctl --help
 ```
 
 ### Build locally
@@ -82,7 +82,7 @@ coincided with lost displays. Enter can leave the Dell mode engaged after exit.
 ## Temperature-controlled silence
 
 ```sh
-# A 15-minute session, with at most 5 minutes per silent period.
+# A 15-minute session, with no deadline for individual silent periods.
 sudo dockctl watch --silence --seconds 900
 
 # Customize thresholds and require stable conditions for one minute.
@@ -98,19 +98,23 @@ interval overlap.
 
 During silence, any sensor continuously at or above its **45/50/70 °C** threshold
 for 30 seconds requests automatic mode. An isolated spike resets the timer once
-all sensors drop below their ventilation thresholds. Each silent period has a
-**300-second maximum target**, even when temperatures stay low. Before another
+all sensors drop below their ventilation thresholds. By default, a silent period has **no time limit**: thermal conditions control
+ventilation. To request a time cap explicitly, add `--silence-seconds 300`.
+Before another
 silent period, the minimum automatic interval and stable cool conditions apply
 again. The final automatic mode is verified.
 
 | Option | Default | Allowed range / meaning |
 |---|---|---|
 | `--seconds` | 300 | Total session, 1–3600 seconds |
-| `--silence-seconds` | 300 | Per silent period, 9–300 seconds |
+| `--silence-seconds` | 0 | No per-period deadline; optionally 9–300 seconds |
 | `--cooling-seconds` | 30 | Minimum automatic interval, 30–600 seconds |
 | `--stable-seconds` | 30 | Continuous qualifying condition in either direction, 1–120 seconds |
 | `--ventilate-at` | `45,50,70` | Local, remote, module thresholds in °C |
 | `--resume-at` | `40,45,66` | Each must be below its ventilation threshold |
+
+The total session deadline (`--seconds`) is separate: reaching it still restores
+automatic mode. Unlimited periods do not establish safe unattended operation.
 
 Critical thresholds **55/60/73 °C**, cancellation, invalid readings and I/O
 errors bypass the stability delay. Configurable ventilation thresholds must

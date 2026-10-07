@@ -42,7 +42,8 @@ coexist with an unknown contract: check `contract_inferred`, not just the status
 
 Start from `dock_watch_defaults()` and validate with
 `dock_watch_options_valid()`. Temperature arrays are local, remote, module.
-The README documents option ranges. `dock_watch()` uses the same policy as the
+The README documents option ranges. `silence_seconds == 0` (the default)
+disables only the per-period deadline; session expiry still restores automatic. `dock_watch()` uses the same policy as the
 CLI; the cancellation callback should only return a flag.
 
 The update callback receives `const dock_watch_event *`:
