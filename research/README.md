@@ -28,6 +28,9 @@ The production API exposes automatic restoration and bounded monitored silence,
 not arbitrary VDM/register writes. Prototype speed tests are intentionally
 separate. Identity/partner checks precede sends and sessions share a process lock.
 
+For sensor limits and the proposed 40/50/75 °C settings, see
+[Thermal limits](THERMAL-LIMITS.md).
+
 ## Evidence versus inference
 
 - Physically observed: profile/temperature reads, audible 3600 RPM acceleration,

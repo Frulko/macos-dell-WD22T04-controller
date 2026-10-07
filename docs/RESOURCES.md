@@ -25,3 +25,10 @@ establish universal compatibility or validate unattended fan stopping.
 
 - [GitHub runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners): `macos-14` ARM64 and `macos-15-intel` x86_64 build runners.
 - [Homebrew taps](https://docs.brew.sh/Taps.html) and [formula cookbook](https://docs.brew.sh/Formula-Cookbook.html): explicit tap URL and source formula packaging.
+
+## Thermal interpretation
+
+- [Dell operating environment](https://www.dell.com/support/manuals/en-ph/wd22tb4-dock/dell_wd22tb4_userguide/docking-specifications?guid=guid-a66fb04b-6aa4-4a5f-921e-72f06a9ed360&lang=en-us): ambient rating, not a sensor limit.
+- [TI TPS65994AD datasheet](https://www.ti.com/lit/ds/symlink/tps65994ad.pdf): operating junction limits versus absolute maximum stress ratings; not proof of a complete dock thermal envelope.
+- [TI thermal metrics](https://www.ti.com/lit/an/spra953d/spra953d.pdf): ambient, case, board and junction measurement distinctions.
+- [Local thermal assessment](../research/THERMAL-LIMITS.md): firmware curve thresholds and remaining sensor/protection uncertainties.
