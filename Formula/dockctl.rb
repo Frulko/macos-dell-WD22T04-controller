@@ -1,7 +1,9 @@
 class Dockctl < Formula
   desc "Dell WD22TB4 telemetry and experimental fan control for macOS"
   homepage "https://github.com/Frulko/macos-dell-WD22T04-controller"
-  # Stable URL and SHA256 are inserted by the release workflow.
+  url "https://github.com/Frulko/macos-dell-WD22T04-controller/archive/refs/tags/v0.1.0.tar.gz"
+  sha256 "61c10d713e23c080487b1593ad8c2affbb06b2fc49801b429bda0ff1de022643"
+  version "0.1.0"
   license all_of: ["MIT", "Apache-2.0"]
   head "https://github.com/Frulko/macos-dell-WD22T04-controller.git", branch: "main"
 
