@@ -20,7 +20,12 @@ jobs:
       - name: Build and run hardware-free checks
         run: make check
       - name: Check the Homebrew formula
-        run: ruby -c Formula/dockctl.rb
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+        run: |
+          ruby -c Formula/dockctl.rb
+          brew tap frulko/dockctl "$GITHUB_WORKSPACE"
+          brew info frulko/dockctl/dockctl
       - name: Package CLI and library
         run: scripts/package.sh "dev-${GITHUB_SHA:0:7}"
       - uses: actions/upload-artifact@v7.0.2

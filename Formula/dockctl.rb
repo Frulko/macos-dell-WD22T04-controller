@@ -5,7 +5,6 @@ class Dockctl < Formula
   head "https://github.com/Frulko/macos-dell-WD22T04-controller.git", branch: "main"
   license all_of: ["MIT", "Apache-2.0"]
 
-  depends_on :macos
   depends_on macos: :ventura
 
   def install
