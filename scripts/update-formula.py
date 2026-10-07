@@ -17,6 +17,6 @@ text = path.read_text()
 # Keep the formula's installer/test logic; update only the immutable source pin.
 text = re.sub(r'^  (?:url|sha256|version) .*\n', '', text, flags=re.MULTILINE)
 text = text.replace('  # Stable URL and SHA256 are inserted by the release workflow.\n', '')
-text = text.replace('  head ', f'  url "{url}"\n  sha256 "{digest}"\n  version "{tag[1:]}"\n  head ', 1)
+text = text.replace('  license ', f'  url "{url}"\n  sha256 "{digest}"\n  version "{tag[1:]}"\n  license ', 1)
 path.write_text(text)
 print(f"Pinned dockctl {tag}: {digest}")
